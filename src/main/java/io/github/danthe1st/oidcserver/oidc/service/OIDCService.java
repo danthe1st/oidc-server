@@ -5,7 +5,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -15,15 +14,16 @@ import io.github.danthe1st.oidcserver.apps.service.ClientDoesNotExistException;
 import io.github.danthe1st.oidcserver.apps.service.ClientService;
 import io.github.danthe1st.oidcserver.auth.model.User;
 import io.github.danthe1st.oidcserver.auth.service.UserService;
-import io.github.danthe1st.oidcserver.oidc.config.JWTConfig;
+import io.github.danthe1st.oidcserver.oidc.repository.JWTKeyRepository;
+import io.github.danthe1st.oidcserver.oidc.repository.KeyRetrievalException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Jwks;
-import io.jsonwebtoken.security.Keys;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,19 +44,18 @@ public class OIDCService {
 	
 	private final String issuer;
 	
-	public OIDCService(JWTConfig jwtConfig, UserService userService, ClientService clientService) {
-		this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtConfig.secret()));
+	public OIDCService(@Value("${jwt.issuer}") String issuer, JWTKeyRepository keyRepo, UserService userService, ClientService clientService) throws KeyRetrievalException {
+		this.secretKey = keyRepo.getHS512Key();
 		this.userService = userService;
 		this.clientService = clientService;
-		this.issuer = jwtConfig.issuer();
+		this.issuer = issuer;
 		
-		KeyPair eccKeyPair = Jwts.SIG.ES512.keyPair().build();
+		KeyPair eccKeyPair = keyRepo.getES512KeyPair();
 		this.publicKey = eccKeyPair.getPublic();
 		this.privateKey = eccKeyPair.getPrivate();
 	}
 	
 	public String generateAuthorizationCode(Client client, User user) {
-		// TODO include client ID
 		Duration expirationDuration = Duration.ofMinutes(5);
 		String subject = user.username();
 		return preparePrivateJWTBuilder(expirationDuration, subject)

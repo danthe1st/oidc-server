@@ -2,6 +2,7 @@ oidcdb*
 /*.key
 /config
 sample-oidc-client/config
+*.jks
 
 HELP.md
 target/
