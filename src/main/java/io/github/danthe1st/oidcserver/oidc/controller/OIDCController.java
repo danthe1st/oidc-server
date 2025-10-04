@@ -14,12 +14,10 @@ import io.github.danthe1st.oidcserver.oidc.service.OIDCService;
 import io.github.danthe1st.oidcserver.oidc.service.VerificationResult;
 import io.github.danthe1st.oidcserver.oidc.service.VerifyAccessTokenResult;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -55,7 +53,7 @@ public class OIDCController {
 	}
 	
 	@GetMapping(value = "authorize")
-	String requestAuthorize(@ParameterObject @ModelAttribute @Valid AuthorizeDTO authorizationInfo, Model model) throws ClientDoesNotExistException {
+	String requestAuthorize(@ModelAttribute @Valid AuthorizeDTO authorizationInfo, Model model) throws ClientDoesNotExistException {
 		
 		if(!authorizationInfo.getScopes().contains("openid")){
 			throw new InvalidRequestException("This server only accepts openid requests");
@@ -72,7 +70,7 @@ public class OIDCController {
 	}
 	
 	@PostMapping("authorize")
-	String doAuthorize(@ParameterObject @ModelAttribute @Valid AuthorizeDTO authorizationInfo, Authentication authentication) throws ClientDoesNotExistException {
+	String doAuthorize(@ModelAttribute @Valid AuthorizeDTO authorizationInfo, Authentication authentication) throws ClientDoesNotExistException {
 		Client client = clientService.getClient(authorizationInfo.clientId());
 		
 		String baseRedirectURL = checkRedirectURL(authorizationInfo, client);
@@ -145,7 +143,7 @@ public class OIDCController {
 	}
 	
 	record AuthorizeDTO(
-		@BindParam("response_type") @Parameter(example = "code") @NotNull String responseType,
+		@BindParam("response_type") @NotNull String responseType,
 		@BindParam("client_id") @NotNull String clientId,
 		@BindParam("redirect_uri") @NotNull String redirectURI,
 		@BindParam("scope") String scope,
