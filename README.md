@@ -3,7 +3,8 @@
 This project contains an _OpenID Provider_ which can be used to provide central authentication for different services. For example, the "Login with Google/GitHub/etc" functionality you might see some websites using are based on OpenID Connect (OIDC). This project implements exactly that functionality and acts as a service that can be used to authenticate against.
 
 > [!WARNING]
-> Do not use this project in production or for anything important. For these use-cases, consider using software like Keycloak or libraries like [Spring Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html).
+> Do not use this project in production or for anything important. This project does not make include all security capabilities from the OAuth2/OIDC standard and has not undergone the level of testing needed for production use.
+> For such use-cases, consider using software like Keycloak or libraries like [Spring Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html). Using this project for educational/learning purposes is perfectly fine.
 
 ### How to use
 
