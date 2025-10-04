@@ -35,6 +35,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+/**
+ * Controller class handling the OIDC flow.
+ * @see OIDCController#requestAuthorize(AuthorizeDTO, Model) GET /oidc/authorize
+ * @see OIDCController#doAuthorize(AuthorizeDTO, Authentication) POST /oidc/authorize
+ * @see OIDCController#verify(TokenRequest, Client) POST /oidc/token
+ * @see OIDCController#userInfo(HttpServletRequest) GET /oidc/userinfo
+ */
 @Controller
 @RequestMapping("/oidc/")
 @Hidden // These endpoints should be called by an application capable of using OIDC and they are documented by /.well-known/openid-configuration
@@ -52,6 +59,14 @@ public class OIDCController {
 		this.userService = userService;
 	}
 	
+	/**
+	 * This endpoint initiates the OIDC flow.
+	 * The user can send a GET request to this endpoint with the client ID and redirect URL which prompts the user to authenticate
+	 * @param authorizationInfo parameters from the request containing information about the relaying party (application initiating the authentication)
+	 * @param model used to pass information to the frontend
+	 * @return a {@link String} identifying the view to show
+	 * @throws ClientDoesNotExistException if the client ID is invalid
+	 */
 	@GetMapping(value = "authorize")
 	String requestAuthorize(@ModelAttribute @Valid AuthorizeDTO authorizationInfo, Model model) throws ClientDoesNotExistException {
 		
@@ -69,6 +84,14 @@ public class OIDCController {
 		return "authorize";
 	}
 	
+	/**
+	 * This endpoint gets invoked when the user confirms the authorization.
+	 * The user is redirected to the provided redirect URL with the authorization code.
+	 * @param authorizationInfo parameters from the request containing information about the relaying party (application initiating the authentication)
+	 * @param authentication identifies the current user
+	 * @return A redirect to the set redirect URL including the authorization code
+	 * @throws ClientDoesNotExistException if the client ID is invalid
+	 */
 	@PostMapping("authorize")
 	String doAuthorize(@ModelAttribute @Valid AuthorizeDTO authorizationInfo, Authentication authentication) throws ClientDoesNotExistException {
 		Client client = clientService.getClient(authorizationInfo.clientId());
@@ -94,16 +117,30 @@ public class OIDCController {
 		return redirectURI;
 	}
 	
-	// TODO exclude from normal authentication and ensure Basic auth is used with client ID and client secret -> handle with AuthorizationProvider and roles
-	// also exclude from CSRF protection
+	/**
+	 * The relaying party (application initiating the authentication) requests this endpoint once it receives the authorization token.
+	 * 
+	 * This request needs to be authenticated with client ID and client secret
+	 * @param tokenRequest Request parameters containing the authorization token and metadata
+	 * @param authenticatedClient parameter proving that the client is authenticated using client ID and client secret
+	 * @return The access token and ID token. The ID token proves that the user is authenticated and the access token can be used to obtain user information.
+	 * @throws JWTVerificationException If there has been an issue with verifying the authorization token (e.g. the client ID does not match the authenticated client)
+	 */
 	@PostMapping(value = "token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 	@ResponseBody
-	VerificationSuccessResult verify(@ModelAttribute @Valid TokenRequest tokenRequest, @AuthenticationPrincipal Client authenticatedClient) throws ClientDoesNotExistException, JWTVerificationException {
+	VerificationSuccessResult verify(@ModelAttribute @Valid TokenRequest tokenRequest, @AuthenticationPrincipal Client authenticatedClient) throws JWTVerificationException {
 		VerificationResult result = oidcService.verify(authenticatedClient, tokenRequest.code());
 		return new VerificationSuccessResult(result.accessToken(), "Bearer", result.idToken());
 	}
 	
-	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "userinfo") // TODO exclude from Spring security auth and CSRF
+	/**
+	 * This endpoint can be used with the access token from {@link OIDCController#verify /oidc/token} to obtain information about the authenticated user.
+	 * The access token must be provided using Bearer authentication.
+	 * @param req The request containing the access token
+	 * @return information about the user the access token corresponds to
+	 * @throws NotAuthenticationException if there is an issue with the access token
+	 */
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "userinfo")
 	@ResponseBody
 	UserInfoResponse userInfo(HttpServletRequest req) throws NotAuthenticationException {
 		String authorizationHeader = req.getHeader("Authorization");
@@ -121,6 +158,8 @@ public class OIDCController {
 		User user = verificationResult.user();
 		return new UserInfoResponse(user.username(), user.username(), user.userType());
 	}
+	
+	// region DTOs
 	
 	record UserInfoResponse(String sub, String name, UserType userType) {// TODO more meaningful data
 	
@@ -170,6 +209,10 @@ public class OIDCController {
 		}
 	}
 	
+	// endregion
+	
+	// region exception handlers
+	
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	@ExceptionHandler(exception = InvalidRequestException.class)
@@ -199,5 +242,5 @@ public class OIDCController {
 	String handleNotAuthenticated(NotAuthenticationException e) {
 		return "Unauthorized";
 	}
-	
+	// endregion
 }
