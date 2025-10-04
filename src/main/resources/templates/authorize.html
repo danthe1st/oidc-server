@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Authorize request</title>
+    </head>
+    <body>
+        <h1>Authorize login?</h1>
+        <p>
+        The application <span th:text="${client.appName}"></span> wants to log in.
+        </p>
+        
+        <form th:action="@{/oidc/authorize}" method="post">
+            <input type="hidden" name="client_id" th:value="${authorization_info.clientId}" />
+            <input type="hidden" name="redirect_uri" th:value="${authorization_info.redirectURI}" />
+            <input type="hidden" name="state" th:value="${authorization_info.state}" />
+            <input type="hidden" name="scope" th:value="${authorization_info.scope}" />
+            <input type="hidden" name="response_type" th:value="${authorization_info.responseType}" />
+            
+            <input type="submit" value="Authorize" />
+        </form>
+    </body>
+</html>
