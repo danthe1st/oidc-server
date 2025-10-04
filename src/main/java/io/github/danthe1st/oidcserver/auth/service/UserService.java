@@ -30,8 +30,11 @@ public class UserService {
 	
 	@Bean
 	ApplicationListener<ApplicationReadyEvent> readyListener(PasswordEncoder passwordEncoder) {
-		return ready -> {
-			userRepo.save(new User(0, "admin", passwordEncoder.encode("admin"), UserType.ADMIN));
+		return _ -> {
+			getUser("admin").orElseGet(
+				() -> userRepo.save(new User(0, "admin", passwordEncoder.encode("admin"), UserType.ADMIN))
+			);
+			
 		};
 	}
 }
