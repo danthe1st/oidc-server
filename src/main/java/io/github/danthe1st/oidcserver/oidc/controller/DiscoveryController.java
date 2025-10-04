@@ -35,7 +35,8 @@ public class DiscoveryController {
 			oidcPath + "authorize", internalOidcPath + "token", internalOidcPath + "userinfo", internalBasePath + "jwks",
 			List.of("code", "token", "id_token"),
 			List.of("public"),
-			List.of("ES512")// TODO RS256
+			List.of("ES512"), // TODO RS256
+			List.of("sub")
 		);
 	}
 	
@@ -51,6 +52,7 @@ public class DiscoveryController {
 		String jwks_uri,
 		List<String> response_types_supported,
 		List<String> subject_types_supported, // TODO find out what that is
-		List<String> id_token_signing_alg_values_supported) {
+		List<String> id_token_signing_alg_values_supported,
+		List<String> claims_supported) {
 	}
 }
