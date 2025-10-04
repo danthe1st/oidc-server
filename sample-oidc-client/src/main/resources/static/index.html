@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Authenticated</title>
+</head>
+<body>
+    <p>You are logged in via OAuth2!</p>
+    <p style="display: hidden" id="usernameBlock">
+        Your username is: <span id="username"></span>
+    </p>
+    <script type="text/javascript">
+    fetch("/username")
+        .then(res => res.text())
+        .then(txt => {
+            document.getElementById("username").textContent=txt
+            document.getElementById("usernameBlock").style=""
+        })
+    </script>
+</body>
+</html>

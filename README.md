@@ -2,6 +2,10 @@
 
 This project contains an _OpenID Provider_ which can be used to provide central authentication for different services. For example, the "Login with Google/GitHub/etc" functionality you might see some websites using are based on OpenID Connect (OIDC). This project implements exactly that functionality and acts as a service that can be used to authenticate against.
 
+### How to use
+
+If Docker Compose is installed, the easiest way to run this project is to execute `docker compose up` after cloning this repository and visiting `http://localhost:8000`. It is then possible to authenticate using `http://localhost:8080` (the default username and password are `admin`/`admin`). After the login is authorized, there should be a confirmation that it worked.
+
 ### How does it work
 
 Any service (_Relying Party_) wanting to authenticate users with an OIDC provider needs to have a client ID and client secret that can be used for that purpose. These credentials are used to ensure the user knows who is attempting to authenticate them and who will get information about their data when the authentication completes.
