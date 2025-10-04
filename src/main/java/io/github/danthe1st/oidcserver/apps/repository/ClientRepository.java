@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Gatherer;
 
 import io.github.danthe1st.oidcserver.apps.model.Client;
+import io.github.danthe1st.oidcserver.auth.model.User;
 import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -102,6 +103,11 @@ public class ClientRepository {
 		);
 	}
 	
+	public Optional<Client> findByIdAndOwner(String clientId, User owner) {
+		return findById(clientId)
+			.filter(c -> c.ownerId() == owner.id());
+	}
+	
 	public Optional<Client> findById(String clientID) {
 		List<Client> urlClients = jdbcTemplate.query("""
 			SELECT c.CLIENT_ID, c.CLIENT_SECRET_HASH, c.APP_NAME,
@@ -134,5 +140,13 @@ public class ClientRepository {
 	
 	public boolean updateClientSecretHash(Client client) {
 		return jdbcTemplate.update("UPDATE CLIENT SET CLIENT_SECRET_HASH = ? WHERE CLIENT_ID = ?", client.clientSecretHash(), client.clientId()) > 0;
+	}
+	
+	public boolean deleteRedirectURI(Client client, String redirectURI) {
+		return jdbcTemplate.update("DELETE FROM CLIENT_REDIRECT_URL WHERE CLIENT_ID = ? AND URL=?", client.clientId(), redirectURI) > 0;
+	}
+	
+	public void addRedirectURI(Client client, String redirectURI) {
+		jdbcTemplate.update("INSERT INTO CLIENT_REDIRECT_URL (CLIENT_ID, URL) VALUES (?,?)", client.clientId(), redirectURI);
 	}
 }

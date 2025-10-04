@@ -99,6 +99,19 @@ public class ClientService {
 		return clientRepo.findByOwner(owner.username());
 	}
 	
+	public void deleteRedirectURI(User currentUser, String clientId, String redirectURI) throws ClientDoesNotExistException, RedirectURIDoesNotExistException {
+		Client client = clientRepo.findByIdAndOwner(clientId, currentUser).orElseThrow(ClientDoesNotExistException::new);
+		if(!clientRepo.deleteRedirectURI(client, redirectURI)){
+			throw new RedirectURIDoesNotExistException();
+		}
+	}
+	
+	public void addRedirectURI(User currentUser, String clientId, String redirectURI) throws ClientDoesNotExistException, InvalidURLException {
+		validateRedirectURL(redirectURI);
+		Client client = clientRepo.findByIdAndOwner(clientId, currentUser).orElseThrow(ClientDoesNotExistException::new);
+		clientRepo.addRedirectURI(client, redirectURI);
+	}
+	
 	public record ClientWithSecret(Client client, String clientSecret) {
 		public ClientWithSecret {
 			Objects.requireNonNull(client);

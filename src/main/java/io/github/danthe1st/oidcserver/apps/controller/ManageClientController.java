@@ -7,6 +7,7 @@ import io.github.danthe1st.oidcserver.apps.service.ClientDoesNotExistException;
 import io.github.danthe1st.oidcserver.apps.service.ClientService;
 import io.github.danthe1st.oidcserver.apps.service.ClientService.ClientWithSecret;
 import io.github.danthe1st.oidcserver.apps.service.InvalidURLException;
+import io.github.danthe1st.oidcserver.apps.service.RedirectURIDoesNotExistException;
 import io.github.danthe1st.oidcserver.auth.service.UserService;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Spring controller for managing applications and their credentials.
+ */
 @RestController
 @RequestMapping("/apps/")
 public class ManageClientController {
@@ -32,8 +37,6 @@ public class ManageClientController {
 		this.clientService = clientService;
 		this.userService = userService;
 	}
-	
-	// TODO add/remove redirect URLs
 	
 	@PostMapping
 	ClientCreationResponse createClient(Authentication auth, @RequestBody ClientCreationRequest request) throws InvalidURLException {
@@ -61,6 +64,19 @@ public class ManageClientController {
 			.toList();
 	}
 	
+	@PostMapping("{clientId}/redirectURIs")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	void addRedirectURI(Authentication auth, @PathVariable("clientId") String clientId, @RequestParam("redirectURI") String redirectURI) throws ClientDoesNotExistException, InvalidURLException {
+		clientService.addRedirectURI(userService.getCurrentUser(auth), clientId, redirectURI);
+	}
+	
+	@DeleteMapping("{clientId}/redirectURIs")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	void deleteRedirectURI(Authentication auth, @PathVariable("clientId") String clientId, @RequestParam("redirectURI") String redirectURI) throws ClientDoesNotExistException, RedirectURIDoesNotExistException {
+		clientService.deleteRedirectURI(userService.getCurrentUser(auth), clientId, redirectURI);
+	}
+	
+	// region exception handlers
 	@ExceptionHandler(exception = ClientDoesNotExistException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public ErrorResponse handleClientNotExisting(ClientDoesNotExistException e) {
@@ -73,6 +89,14 @@ public class ManageClientController {
 		return new ErrorResponse(e.getMessage());
 	}
 	
+	@ExceptionHandler(exception = RedirectURIDoesNotExistException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleMissingRedirectURI(RedirectURIDoesNotExistException e) {
+		return new ErrorResponse("The client ID is not associated with the provided redirect URI.");
+	}
+	// endregion
+	
+	// region DTOs
 	record ClientCreationRequest(String appName, List<String> requestURLs) {
 		
 	}
@@ -90,4 +114,5 @@ public class ManageClientController {
 	
 	record ErrorResponse(@Nullable String message) {
 	}
+	// endregion
 }
