@@ -1,5 +1,7 @@
 package io.github.danthe1st.oidcserver.apps.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -24,10 +26,11 @@ public class ClientRepository {
 		if(redirectURL != null){
 			redirectURLs.add(redirectURL);
 		}
-		return new Client(notNull(rs.getString(1)), notNull(rs.getString(2)), notNull(rs.getString(3)), rs.getLong(4), redirectURLs);
+		return new Client(getStringAssertNotNull(rs, 1), getStringAssertNotNull(rs, 2), getStringAssertNotNull(rs, 3), rs.getLong(4), redirectURLs);
 	};
 	
-	private static <T> T notNull(@Nullable T element) {
+	private static String getStringAssertNotNull(ResultSet rs, int index) throws SQLException {
+		String element = rs.getString(index);
 		if(element == null){
 			throw new NullPointerException();
 		}
