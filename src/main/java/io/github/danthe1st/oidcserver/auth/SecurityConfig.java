@@ -10,6 +10,7 @@ import java.util.UUID;
 import io.github.danthe1st.oidcserver.auth.service.BasicAuthManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -35,7 +37,7 @@ public class SecurityConfig {
 	}
 	
 	@Bean
-	SecurityFilterChain createFilterChain(HttpSecurity http, BasicAuthManager clientAuthManager) throws Exception {
+	SecurityFilterChain createFilterChain(HttpSecurity http, BasicAuthManager clientAuthManager, PersistentTokenRepository rememberMeRepo) throws Exception {
 		return http
 			.formLogin(l -> l.defaultSuccessUrl("/swagger-ui/index.html"))
 			.authorizeHttpRequests(req -> req.requestMatchers("/admin/**").hasAnyRole("ADMIN"))
@@ -56,7 +58,7 @@ public class SecurityConfig {
 			).rememberMe(
 				r -> r
 					.key(getKey())
-					.tokenRepository(new JdbcTokenRepositoryImpl())
+					.tokenRepository(rememberMeRepo)
 			).addFilterBefore(new BasicAuthenticationFilter(clientAuthManager), AuthorizationFilter.class)
 			.build();
 	}
@@ -73,6 +75,13 @@ public class SecurityConfig {
 		}catch(IOException e){
 			throw new UncheckedIOException(e);
 		}
+	}
+	
+	@Bean
+	PersistentTokenRepository rememberMeRepository(JdbcTemplate jdbcTemplate) {
+		JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
+		repo.setJdbcTemplate(jdbcTemplate);
+		return repo;
 	}
 	
 }
