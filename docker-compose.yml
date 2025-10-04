@@ -23,7 +23,7 @@ services:
       SERVER_URL: http://localhost:8080
       SERVER_INT_ADDRESS: http://oidc-server:8080
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/.well-known/openid-configuration"]
       interval: 2s
       timeout: 1s
       retries: 10
