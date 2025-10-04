@@ -9,28 +9,30 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DiscoveryController {
-	// TODO well known/discovery URL
-	
 	private final OIDCService oidcService;
 	
 	private final String issuer;
 	private final String basePath;
+	private final String internalBasePath;
 	private final String oidcPath;
+	private final String internalOidcPath;
 	
 	public DiscoveryController(OIDCService oidcService,
 		@Value("${jwt.issuer}") String issuer, @Value("${server.servlet.context-path:/}") String contextPath,
-		@Value("${server.address:http://localhost:8080}") String address) {
+		@Value("${server.url:${jwt.issuer}}") String address, @Value("${server.int_address:${server.url}}") String internalAddress) {
 		this.oidcService = oidcService;
 		this.issuer = issuer;
 		this.basePath = address + contextPath;
+		this.internalBasePath = internalAddress + contextPath;
 		this.oidcPath = basePath + "oidc/";
+		this.internalOidcPath = internalBasePath + "oidc/";
 	}
 	
 	@GetMapping("/.well-known/openid-configuration")
 	OIDCConfiguration getOidcConfiguration() {
 		return new OIDCConfiguration(
 			issuer,
-			oidcPath + "authorize", oidcPath + "token", oidcPath + "userinfo", basePath + "jwks",
+			oidcPath + "authorize", internalOidcPath + "token", internalOidcPath + "userinfo", internalBasePath + "jwks",
 			List.of("code", "token", "id_token"),
 			List.of("public"),
 			List.of("ES512")// TODO RS256

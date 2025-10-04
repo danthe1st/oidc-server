@@ -1,11 +1,6 @@
 package io.github.danthe1st.oidcserver.auth;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
-import java.util.UUID;
 
 import io.github.danthe1st.oidcserver.auth.service.BasicAuthManager;
 import org.springframework.context.annotation.Bean;
@@ -57,24 +52,9 @@ public class SecurityConfig {
 					.ignoringRequestMatchers("/oidc/token", "/oidc/userinfo")
 			).rememberMe(
 				r -> r
-					.key(getKey())
 					.tokenRepository(rememberMeRepo)
 			).addFilterBefore(new BasicAuthenticationFilter(clientAuthManager), AuthorizationFilter.class)
 			.build();
-	}
-	
-	private String getKey() {
-		Path keyFile = Path.of("rememberme.key");
-		try{
-			if(Files.exists(keyFile)){
-				return Files.readString(keyFile);
-			}
-			String key = UUID.randomUUID().toString();
-			Files.writeString(keyFile, key);
-			return key;
-		}catch(IOException e){
-			throw new UncheckedIOException(e);
-		}
 	}
 	
 	@Bean

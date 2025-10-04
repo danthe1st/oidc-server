@@ -1,0 +1,44 @@
+services:
+  init:
+    image: alpine
+    command: chown 100:100 -R /data/
+    volumes:
+    - client_credentials:/data/sample_client
+    - server_volume:/data/data
+  oidc-server:
+    build: .
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    ports:
+    - 8080:8080
+    volumes:
+    - client_credentials:/data/sample_client
+    - server_volume:/data/data
+    environment:
+      SAMPLE_APP_CREDENTIAL_FILE: /data/sample_client/client.credentials.properties
+      SAMPLE_APP_REDIRECT_URL: http://localhost:8000/login/oauth2/code/custom
+      SERVER_DIRECTORY: /data/data
+      JWT_ISSUER: http://oidc-server:8080
+      SERVER_URL: http://localhost:8080
+      SERVER_INT_ADDRESS: http://oidc-server:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 2s
+      timeout: 1s
+      retries: 10
+  oidc_client:
+    build: sample-oidc-client
+    depends_on:
+      oidc-server:
+        condition: service_healthy
+    ports:
+    - 8000:8000
+    volumes:
+    - client_credentials:/data/oidc_credentials
+    environment:
+      SPRING_CONFIG_IMPORT: file:/data/oidc_credentials/client.credentials.properties
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_CUSTOM_ISSUER_URI: http://oidc-server:8080
+volumes:
+  server_volume: {}
+  client_credentials: {}

@@ -32,13 +32,18 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class JWTKeyRepository {
 	
-	private static final Path KEY_STORE_PATH = Path.of("keys.jks");
+	private final Path keyStorePath;
 	private KeyStore keyStore;
+	
+	public JWTKeyRepository(@Value("${SERVER_DIRECTORY:.}/keys.jks") String keyStoreDirectory) {
+		this.keyStorePath = Path.of(keyStoreDirectory);
+	}
 	
 	public KeyPair getES512KeyPair() throws KeyRetrievalException {
 		try{
@@ -58,8 +63,8 @@ public class JWTKeyRepository {
 	
 	@PostConstruct
 	void loadKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, OperatorCreationException {
-		if(Files.exists(KEY_STORE_PATH)){
-			keyStore = KeyStore.getInstance(KEY_STORE_PATH.toFile(), new char[0]);
+		if(Files.exists(keyStorePath)){
+			keyStore = KeyStore.getInstance(keyStorePath.toFile(), new char[0]);
 		}else{
 			generateKeyStore();
 		}
@@ -72,7 +77,7 @@ public class JWTKeyRepository {
 		addNewKeyPairToKeyStore(store, Jwts.SIG.ES512);
 		addNewSingleKeyPairToKeyStore(store, Jwts.SIG.HS512);
 		
-		try(OutputStream os = new BufferedOutputStream(Files.newOutputStream(KEY_STORE_PATH))){
+		try(OutputStream os = new BufferedOutputStream(Files.newOutputStream(keyStorePath))){
 			store.store(os, new char[0]);// TODO use password for keys
 		}
 		this.keyStore = store;

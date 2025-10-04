@@ -4,6 +4,8 @@ oidcdb*
 sample-oidc-client/config
 *.jks
 
+/data
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
