@@ -32,6 +32,7 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -39,7 +40,7 @@ import org.springframework.stereotype.Repository;
 public class JWTKeyRepository {
 	
 	private final Path keyStorePath;
-	private KeyStore keyStore;
+	private @Nullable KeyStore keyStore;
 	
 	public JWTKeyRepository(@Value("${SERVER_DIRECTORY:.}/keys.jks") String keyStoreDirectory) {
 		this.keyStorePath = Path.of(keyStoreDirectory);
@@ -106,14 +107,14 @@ public class JWTKeyRepository {
 	}
 	
 	private SecretKey getSecretKey(MacAlgorithm alg) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-		if(keyStore.getKey(alg.getId(), new char[0]) instanceof SecretKey key){
+		if(keyStore != null && keyStore.getKey(alg.getId(), new char[0]) instanceof SecretKey key){
 			return key;
 		}
 		throw new UnrecoverableKeyException("key not found");
 	}
 	
 	private KeyPair getKeyPair(SignatureAlgorithm alg) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException {
-		if(keyStore.getEntry(alg.getId(), new KeyStore.PasswordProtection(new char[0])) instanceof PrivateKeyEntry entry){
+		if(keyStore != null && keyStore.getEntry(alg.getId(), new KeyStore.PasswordProtection(new char[0])) instanceof PrivateKeyEntry entry){
 			return new KeyPair(entry.getCertificate().getPublicKey(), entry.getPrivateKey());
 		}
 		throw new UnrecoverableEntryException("key pair not found");
