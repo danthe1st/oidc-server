@@ -13,6 +13,7 @@ import io.github.danthe1st.oidcserver.oidc.service.JWTVerificationException;
 import io.github.danthe1st.oidcserver.oidc.service.OIDCService;
 import io.github.danthe1st.oidcserver.oidc.service.VerificationResult;
 import io.github.danthe1st.oidcserver.oidc.service.VerifyAccessTokenResult;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -37,6 +38,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Controller
 @RequestMapping("/oidc/")
+@Hidden // These endpoints should be called by an application capable of using OIDC and they are documented by /.well-known/openid-configuration
 public class OIDCController {
 	
 	private static final String BEARER_PREFIX = "Bearer ";
