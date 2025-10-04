@@ -63,7 +63,7 @@ public class JWTKeyRepository {
 	}
 	
 	@PostConstruct
-	void loadKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, OperatorCreationException {
+	public void loadKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, OperatorCreationException {
 		if(Files.exists(keyStorePath)){
 			keyStore = KeyStore.getInstance(keyStorePath.toFile(), new char[0]);
 		}else{

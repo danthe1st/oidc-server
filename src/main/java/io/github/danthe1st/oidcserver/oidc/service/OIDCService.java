@@ -32,8 +32,6 @@ public class OIDCService {
 	private static final String CLIENT_ID_FIELD_NAME = "cid";
 	private static final String TOKEN_TYPE_FIELD_NAME = "typ";
 	
-	// TODO type of token
-	
 	private final SecretKey secretKey;
 	
 	private final PublicKey publicKey;
@@ -71,21 +69,21 @@ public class OIDCService {
 		String clientId = (String) payload.get(CLIENT_ID_FIELD_NAME);
 		
 		if(!client.clientId().equals(clientId)){
-			throw new JWTVerificationException();
+			throw new JWTVerificationException("incorrect client");
 		}
 		
 		User user = userService.getUser(subject).orElseThrow(JWTVerificationException::new);
 		return new VerificationResult(generateIDToken(client, user), generateAccessToken(client, user));
 	}
 	
-	private String generateIDToken(Client client, User user) {// TODO use for verify
+	private String generateIDToken(Client client, User user) {
 		return preparePublicJWTBuilder(Duration.ofMinutes(5), user.username())
 			.audience().add(client.clientId()).and()
 			// claims (more information about the user) could be added here
 			.compact();
 	}
 	
-	private String generateAccessToken(Client client, User user) {// TODO use for verify
+	private String generateAccessToken(Client client, User user) {
 		return preparePrivateJWTBuilder(Duration.ofMinutes(15), user.username())
 			.claim(CLIENT_ID_FIELD_NAME, client.clientId())
 			.claim(TOKEN_TYPE_FIELD_NAME, "access_token")
@@ -141,11 +139,11 @@ public class OIDCService {
 		try{
 			payload = parser.parseSignedClaims(code).getPayload();
 		}catch(JwtException e){
-			throw new JWTVerificationException();
+			throw new JWTVerificationException("JWT parsing failed");
 		}
 		
 		if(!expectedType.equals(payload.get(TOKEN_TYPE_FIELD_NAME))){
-			throw new JWTVerificationException();
+			throw new JWTVerificationException("incorrect token type");
 		}
 		
 		return payload;
