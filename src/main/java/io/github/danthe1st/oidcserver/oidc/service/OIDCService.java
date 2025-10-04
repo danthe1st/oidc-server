@@ -97,12 +97,15 @@ public class OIDCService {
 		Claims claims = parsePrivateJWT(jwt, "access_token");
 		
 		String clientId = (String) claims.get(CLIENT_ID_FIELD_NAME);
+		if(clientId == null){
+			throw new JWTVerificationException();
+		}
 		
 		User user = userService.getUser(claims.getSubject()).orElseThrow(JWTVerificationException::new);
 		
 		try{
 			return new VerifyAccessTokenResult(user, clientService.getClient(clientId));
-		}catch(ClientDoesNotExistException e){
+		}catch(ClientDoesNotExistException _){
 			throw new JWTVerificationException();
 		}
 	}

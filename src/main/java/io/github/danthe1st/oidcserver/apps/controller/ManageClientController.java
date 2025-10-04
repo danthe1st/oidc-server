@@ -8,6 +8,7 @@ import io.github.danthe1st.oidcserver.apps.service.ClientService;
 import io.github.danthe1st.oidcserver.apps.service.ClientService.ClientWithSecret;
 import io.github.danthe1st.oidcserver.apps.service.InvalidURLException;
 import io.github.danthe1st.oidcserver.auth.service.UserService;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -87,6 +88,6 @@ public class ManageClientController {
 		}
 	}
 	
-	record ErrorResponse(String message) {
+	record ErrorResponse(@Nullable String message) {
 	}
 }

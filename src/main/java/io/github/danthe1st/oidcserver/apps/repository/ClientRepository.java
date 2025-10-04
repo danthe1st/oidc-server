@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Gatherer;
 
 import io.github.danthe1st.oidcserver.apps.model.Client;
+import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -23,8 +24,15 @@ public class ClientRepository {
 		if(redirectURL != null){
 			redirectURLs.add(redirectURL);
 		}
-		return new Client(rs.getString(1), rs.getString(2), rs.getString(3), rs.getLong(4), redirectURLs);
+		return new Client(notNull(rs.getString(1)), notNull(rs.getString(2)), notNull(rs.getString(3)), rs.getLong(4), redirectURLs);
 	};
+	
+	private static <T> T notNull(@Nullable T element) {
+		if(element == null){
+			throw new NullPointerException();
+		}
+		return element;
+	}
 	
 	public ClientRepository(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
@@ -56,6 +64,7 @@ public class ClientRepository {
 	private Gatherer<Client, ?, Client> mergingClients() {
 		return Gatherer.ofSequential(
 			() -> new Object() {
+				@Nullable
 				Client cl;
 			},
 			(state, elem, ds) -> {

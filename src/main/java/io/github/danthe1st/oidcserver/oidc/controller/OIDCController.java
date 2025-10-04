@@ -18,6 +18,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+import org.jspecify.annotations.Nullable;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -163,7 +165,7 @@ public class OIDCController {
 			return getScopes(scope);
 		}
 		
-		private Set<String> getScopes(String scope) {
+		private static Set<String> getScopes(String scope) {
 			if(scope == null || scope.isEmpty()){
 				return Set.of("openid");
 			}
@@ -174,6 +176,7 @@ public class OIDCController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	@ExceptionHandler(exception = InvalidRequestException.class)
+	@Nullable
 	String handleInvalidRequest(InvalidRequestException e) {
 		return e.getMessage();// TODO human error page
 	}
@@ -181,6 +184,7 @@ public class OIDCController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	@ExceptionHandler(exception = ClientDoesNotExistException.class)
+	@Nullable
 	String handleNonexistingClient(ClientDoesNotExistException e) {
 		return e.getMessage();// TODO human error page
 	}

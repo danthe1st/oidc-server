@@ -13,17 +13,25 @@ public class ClientAuthentication extends AbstractAuthenticationToken {
 	public ClientAuthentication(Client client) {
 		super(List.of(new SimpleGrantedAuthority("ROLE_CLIENT")));
 		this.client = client;
-		super.setDetails(client);
-		super.setAuthenticated(true);
 	}
 	
 	@Override
 	public Object getCredentials() {
-		return null;
+		return new Object();
 	}
 	
 	@Override
 	public Client getPrincipal() {
+		return client;
+	}
+	
+	@Override
+	public boolean isAuthenticated() {
+		return true;
+	}
+	
+	@Override
+	public Object getDetails() {
 		return client;
 	}
 }

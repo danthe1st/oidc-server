@@ -123,6 +123,6 @@ public class JWTKeyRepository {
 	private void addNewSingleKeyPairToKeyStore(KeyStore store, MacAlgorithm alg) throws KeyStoreException {
 		SecretKey secretKey = alg.key().build();
 		store.setEntry(alg.getId(), new SecretKeyEntry(secretKey), new KeyStore.PasswordProtection(new char[0]));
-		store.setKeyEntry(alg.getId(), secretKey, new char[0], null);
+//		store.setKeyEntry(alg.getId(), secretKey, new char[0], null);
 	}
 }
