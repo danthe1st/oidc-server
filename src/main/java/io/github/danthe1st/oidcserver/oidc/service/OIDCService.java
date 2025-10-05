@@ -32,7 +32,7 @@ public class OIDCService {
 	private static final String CLIENT_ID_FIELD_NAME = "cid";
 	private static final String TOKEN_TYPE_FIELD_NAME = "typ";
 	
-	private final SecretKey secretKey;
+	private final SecretKey aesKey;
 	
 	private final PublicKey publicKey;
 	private final PrivateKey privateKey;
@@ -43,7 +43,6 @@ public class OIDCService {
 	private final String issuer;
 	
 	public OIDCService(@Value("${jwt.issuer}") String issuer, JWTKeyRepository keyRepo, UserService userService, ClientService clientService) throws KeyRetrievalException {
-		this.secretKey = keyRepo.getHS512Key();
 		this.userService = userService;
 		this.clientService = clientService;
 		this.issuer = issuer;
@@ -51,6 +50,7 @@ public class OIDCService {
 		KeyPair eccKeyPair = keyRepo.getES512KeyPair();
 		this.publicKey = eccKeyPair.getPublic();
 		this.privateKey = eccKeyPair.getPrivate();
+		this.aesKey = keyRepo.getA256GCMKey();
 	}
 	
 	public String generateAuthorizationCode(Client client, User user) {
@@ -109,7 +109,7 @@ public class OIDCService {
 	}
 	
 	private JwtBuilder preparePrivateJWTBuilder(Duration expirationDuration, String subject) {
-		return Jwts.builder().signWith(secretKey, Jwts.SIG.HS512)
+		return Jwts.builder().encryptWith(aesKey, Jwts.ENC.A256GCM)
 			.issuedAt(new Date())
 			.subject(subject)// TODO replace with user ID in some cases?
 			.expiration(Date.from(Instant.now().plus(expirationDuration)))
@@ -125,7 +125,7 @@ public class OIDCService {
 	}
 	
 	private Claims parsePrivateJWT(String code, String expectedType) throws JWTVerificationException {
-		JwtParser parser = Jwts.parser().verifyWith(secretKey).build();
+		JwtParser parser = Jwts.parser().decryptWith(aesKey).build();
 		return parseJWT(code, expectedType, parser);
 	}
 	
@@ -137,8 +137,8 @@ public class OIDCService {
 	private Claims parseJWT(String code, String expectedType, JwtParser parser) throws JWTVerificationException {
 		Claims payload;
 		try{
-			payload = parser.parseSignedClaims(code).getPayload();
-		}catch(JwtException e){
+			payload = parser.parseEncryptedClaims(code).getPayload();
+		}catch(JwtException _){
 			throw new JWTVerificationException("JWT parsing failed");
 		}
 		

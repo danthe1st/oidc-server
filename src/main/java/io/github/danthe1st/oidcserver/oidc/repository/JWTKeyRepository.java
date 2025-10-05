@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -21,8 +22,10 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.MacAlgorithm;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -54,9 +57,9 @@ public class JWTKeyRepository {
 		}
 	}
 	
-	public SecretKey getHS512Key() throws KeyRetrievalException {
+	public SecretKey getA256GCMKey() throws KeyRetrievalException {
 		try{
-			return getSecretKey(Jwts.SIG.HS512);
+			return getSecretKey(Jwts.ENC.A256GCM);
 		}catch(UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e){
 			throw new KeyRetrievalException(e);
 		}
@@ -65,10 +68,16 @@ public class JWTKeyRepository {
 	@PostConstruct
 	public void loadKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, OperatorCreationException {
 		if(Files.exists(keyStorePath)){
-			keyStore = KeyStore.getInstance(keyStorePath.toFile(), new char[0]);
-		}else{
-			generateKeyStore();
+			try{
+				keyStore = KeyStore.getInstance(keyStorePath.toFile(), new char[0]);
+				getES512KeyPair();
+				getA256GCMKey();
+				return;
+			}catch(GeneralSecurityException | IOException | KeyRetrievalException _){
+				generateKeyStore();
+			}
 		}
+		generateKeyStore();
 	}
 	
 	private void generateKeyStore() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, OperatorCreationException {
@@ -76,7 +85,7 @@ public class JWTKeyRepository {
 		store.load(null, null);
 		
 		addNewKeyPairToKeyStore(store, Jwts.SIG.ES512);
-		addNewSingleKeyPairToKeyStore(store, Jwts.SIG.HS512);
+		addNewSingleKeyPairToKeyStore(store, Jwts.ENC.A256GCM);
 		
 		try(OutputStream os = new BufferedOutputStream(Files.newOutputStream(keyStorePath))){
 			store.store(os, new char[0]);// TODO use password for keys
@@ -106,7 +115,7 @@ public class JWTKeyRepository {
 		);
 	}
 	
-	private SecretKey getSecretKey(MacAlgorithm alg) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+	private SecretKey getSecretKey(Identifiable alg) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
 		if(keyStore != null && keyStore.getKey(alg.getId(), new char[0]) instanceof SecretKey key){
 			return key;
 		}
@@ -120,9 +129,12 @@ public class JWTKeyRepository {
 		throw new UnrecoverableEntryException("key pair not found");
 	}
 	
-	private void addNewSingleKeyPairToKeyStore(KeyStore store, MacAlgorithm alg) throws KeyStoreException {
-		SecretKey secretKey = alg.key().build();
-		store.setEntry(alg.getId(), new SecretKeyEntry(secretKey), new KeyStore.PasswordProtection(new char[0]));
-//		store.setKeyEntry(alg.getId(), secretKey, new char[0], null);
+	private void addNewSingleKeyPairToKeyStore(KeyStore store, AeadAlgorithm alg) throws KeyStoreException {
+		addNewSingleKeyPairToKeyStore(store, alg, alg.key());
+	}
+	
+	private void addNewSingleKeyPairToKeyStore(KeyStore store, Identifiable id, SecretKeyBuilder key) throws KeyStoreException {
+		SecretKey secretKey = key.build();
+		store.setEntry(id.getId(), new SecretKeyEntry(secretKey), new KeyStore.PasswordProtection(new char[0]));
 	}
 }
