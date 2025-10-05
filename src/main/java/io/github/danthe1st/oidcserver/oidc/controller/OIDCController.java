@@ -109,6 +109,20 @@ public class OIDCController {
 		return "redirect:" + uri;
 	}
 	
+	@PostMapping("deny")
+	String denyAuthorization(@ModelAttribute AuthorizeDTO authorizationInfo) throws ClientDoesNotExistException {
+		String baseRedirectURL = checkRedirectURL(authorizationInfo, clientService.getClient(authorizationInfo.clientId()));
+		
+		URI uri = new DefaultUriBuilderFactory()
+			.uriString(baseRedirectURL)
+			.queryParam("error", "invalid_request")
+			.queryParam("error_description", "Login failed")
+			.queryParam("state", authorizationInfo.state())
+			.build();
+		
+		return "redirect:" + uri;
+	}
+	
 	private String checkRedirectURL(AuthorizeDTO authorizationInfo, Client client) {
 		String redirectURI = authorizationInfo.redirectURI();
 		if(!client.redirectURLs().contains(redirectURI)){
