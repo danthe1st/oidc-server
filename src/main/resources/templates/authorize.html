@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8"/>
-        <title>Authorize request</title>
-    </head>
-    <body>
-        <h1>Authorize login?</h1>
-        <p>
-        The application <span th:text="${client.appName}"></span> wants to log in.
-        </p>
-        
-        <form method="post">
-	        <input type="hidden" th:name="${_csrf.parameterName}"  th:value="${_csrf.token}" />
-            <input type="hidden" name="client_id" th:value="${authorization_info.clientId}" />
-            <input type="hidden" name="redirect_uri" th:value="${authorization_info.redirectURI}" />
-            <input type="hidden" name="state" th:value="${authorization_info.state}" />
-            <input type="hidden" name="scope" th:value="${authorization_info.scope}" />
-            <input type="hidden" name="response_type" th:value="${authorization_info.responseType}" />
-            
-            <input type="submit" th:formaction="@{/oidc/authorize}" value="Authorize Login"/>
-            <input type="submit" th:formaction="@{/oidc/deny}" value="Abort"/>
-        </form>
-    </body>
+<head>
+	<meta charset="UTF-8" />
+	<title>Authorize request</title>
+	<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"></link>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	<div class="container" style="padding-top: 1em">
+		<h1>Authorize login?</h1>
+		<p>
+			The application <code th:text="${client.appName}"></code> wants you to log in.
+		</p>
+
+		<form method="post">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			<input type="hidden" name="client_id" th:value="${authorization_info.clientId}" />
+			<input type="hidden" name="redirect_uri" th:value="${authorization_info.redirectURI}" />
+			<input type="hidden" name="state" th:value="${authorization_info.state}" />
+			<input type="hidden" name="scope" th:value="${authorization_info.scope}" />
+			<input type="hidden" name="response_type" th:value="${authorization_info.responseType}" />
+			<input type="submit" th:formaction="@{/oidc/authorize}" value="Authorize Login" class="btn btn-primary" />
+			<input type="submit" th:formaction="@{/oidc/deny}" value="Abort" class="btn btn-secondary" />
+		</form>
+	</div>
+</body>
 </html>

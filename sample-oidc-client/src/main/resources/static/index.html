@@ -3,20 +3,24 @@
 <head>
 	<meta charset="UTF-8" />
 	<title>Authenticated</title>
+	<link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet"></link>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <h1>Success!</h1>
-    <p>You are logged in via OIDC!</p>
-    <p style="display: none" id="usernameBlock">
-        Your username is: <span id="username"></span>
-    </p>
-    <script type="text/javascript">
-    fetch("/username")
-        .then(res => res.text())
-        .then(txt => {
-            document.getElementById("username").textContent=txt
-            document.getElementById("usernameBlock").style=""
-        })
-    </script>
+	<div class="container" style="padding-top: 1em">	
+		<h1>Success!</h1>
+		<p>You are logged in via OIDC!</p>
+		<p style="display: none" id="usernameBlock">
+			Your username is: <code id="username"></code>
+		</p>
+		<script type="text/javascript">
+		fetch("/username")
+			.then(res => res.text())
+			.then(txt => {
+				document.getElementById("username").textContent=txt
+				document.getElementById("usernameBlock").style=""
+			})
+		</script>
+	</div>
 </body>
 </html>

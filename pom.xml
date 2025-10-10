@@ -91,6 +91,21 @@
             <version>0.13.0</version>
             <scope>runtime</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator</artifactId>
+            <version>0.52</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>5.3.8</version>
+            <scope>runtime</scope>
+        </dependency>
+        
         <dependency>
           <groupId>org.checkerframework</groupId>
           <artifactId>checker-qual</artifactId>
