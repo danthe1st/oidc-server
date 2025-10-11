@@ -173,7 +173,7 @@ class ManageUsersTest {
 				}
 				""".formatted(type.name())));
 		assertEquals(2, userRepo.count());
-		User user = userService.getUser("test").orElseThrow(() -> fail("user not found"));
+		User user = userService.getUser("test").orElseGet(() -> fail("user not found"));
 		assertEquals("test", user.username());
 		assertEquals(type, user.userType());
 		assertTrue(passwordEncoder.matches("testpwd", user.passwordHash()));
@@ -284,7 +284,7 @@ class ManageUsersTest {
 					"type": "ADMIN"
 				}
 				"""));
-		User user = userService.getUser("admin").orElseThrow(() -> fail("user not found"));
+		User user = userService.getUser("admin").orElseGet(() -> fail("user not found"));
 		assertTrue(passwordEncoder.matches("test123", user.passwordHash()));
 	}
 	
