@@ -143,7 +143,7 @@ class ManageUsersTest {
 				}
 				"""));
 		assertEquals(2, userRepo.count());
-		User user = userService.getUser("test").orElseThrow(() -> fail("user not found"));
+		User user = userService.getUser("test").orElseGet(() -> fail("user not found"));
 		assertEquals("test", user.username());
 		assertEquals(UserType.USER, user.userType());
 		assertTrue(passwordEncoder.matches("testpwd", user.passwordHash()));
