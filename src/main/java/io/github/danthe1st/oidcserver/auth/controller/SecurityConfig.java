@@ -1,4 +1,4 @@
-package io.github.danthe1st.oidcserver.auth;
+package io.github.danthe1st.oidcserver.auth.controller;
 
 import java.util.Map;
 
@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.rememberme.JdbcTokenRepos
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
@@ -32,7 +33,7 @@ public class SecurityConfig {
 	}
 	
 	@Bean
-	SecurityFilterChain createFilterChain(HttpSecurity http, BasicAuthManager clientAuthManager, PersistentTokenRepository rememberMeRepo) throws Exception {
+	SecurityFilterChain createFilterChain(HttpSecurity http, BasicAuthManager clientAuthManager, PersistentTokenRepository rememberMeRepo, CsrfTokenRepository csrfTokenRepository) throws Exception {
 		return http
 			.formLogin(l -> l.defaultSuccessUrl("/swagger-ui/index.html"))
 			.authorizeHttpRequests(req -> req.requestMatchers("/admin/**").hasAnyRole("ADMIN"))
@@ -47,7 +48,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(req -> req.requestMatchers("/oidc/userinfo").permitAll())
 			.authorizeHttpRequests(req -> req.anyRequest().authenticated())
 			.csrf(
-				csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+				csrf -> csrf.csrfTokenRepository(csrfTokenRepository)
 					.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
 					.ignoringRequestMatchers("/oidc/token", "/oidc/userinfo")
 			).rememberMe(
@@ -55,6 +56,11 @@ public class SecurityConfig {
 					.tokenRepository(rememberMeRepo)
 			).addFilterBefore(new BasicAuthenticationFilter(clientAuthManager), AuthorizationFilter.class)
 			.build();
+	}
+	
+	@Bean
+	CsrfTokenRepository csrfTokenRepository() {
+		return CookieCsrfTokenRepository.withHttpOnlyFalse();
 	}
 	
 	@Bean
