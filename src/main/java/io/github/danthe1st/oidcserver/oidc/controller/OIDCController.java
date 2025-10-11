@@ -45,7 +45,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 @Controller
 @RequestMapping("/oidc/")
 @Hidden // These endpoints should be called by an application capable of using OIDC and they are documented by /.well-known/openid-configuration
-public class OIDCController {
+class OIDCController {
 	
 	private static final String BEARER_PREFIX = "Bearer ";
 	

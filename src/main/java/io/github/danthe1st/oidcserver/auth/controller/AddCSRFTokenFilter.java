@@ -13,7 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UrlPathHelper;
 
 @Component
-public class AddCSRFTokenFilter extends OncePerRequestFilter {
+class AddCSRFTokenFilter extends OncePerRequestFilter {
 	
 	private final CsrfTokenRepository tokenRepository;
 	

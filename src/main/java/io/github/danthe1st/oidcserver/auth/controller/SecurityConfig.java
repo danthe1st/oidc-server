@@ -20,7 +20,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
-public class SecurityConfig {
+class SecurityConfig {
 	
 	@Bean
 	PasswordEncoder passwordEncoder() {

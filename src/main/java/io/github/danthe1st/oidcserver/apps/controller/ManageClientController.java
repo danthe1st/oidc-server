@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/apps/")
-public class ManageClientController {
+class ManageClientController {
 	
 	private final ClientService clientService;
 	private final UserService userService;

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
-public class DiscoveryController {
+class DiscoveryController {
 	private final OIDCService oidcService;
 	
 	private final String issuer;
