@@ -36,7 +36,7 @@ public class SecurityConfig {
 		return http
 			.formLogin(l -> l.defaultSuccessUrl("/swagger-ui/index.html"))
 			.authorizeHttpRequests(req -> req.requestMatchers("/admin/**").hasAnyRole("ADMIN"))
-			.authorizeHttpRequests(req -> req.requestMatchers("/apps/**").hasAnyRole("ADMIN"))
+			.authorizeHttpRequests(req -> req.requestMatchers("/apps/**").hasAnyRole("USER"))
 			.authorizeHttpRequests(req -> req.requestMatchers("/swagger-ui/**").authenticated())
 			.authorizeHttpRequests(req -> req.requestMatchers("/v3/api-docs/**").authenticated())
 			.authorizeHttpRequests(req -> req.requestMatchers("/error").permitAll())

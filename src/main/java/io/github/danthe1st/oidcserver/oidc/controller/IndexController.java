@@ -1,4 +1,4 @@
-package io.github.danthe1st.oidcserver.controller;
+package io.github.danthe1st.oidcserver.oidc.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
