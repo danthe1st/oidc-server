@@ -27,3 +27,11 @@ Once an app is created, any service in posession of these credentials can use th
 ### Sample client
 
 The [`simple-oidc-client`](./simple-oidc-client) project contains a simple server that can be used to authenticate against the OIDC server provided the client ID and client secret are properly set up. That project doesn't contain any OIDC-specific code, it just uses Spring Security's support for OIDC.
+
+### Features
+
+This project includes the following main features:
+- Authenticating other applications via OIDC
+- API for user management
+- API for managing applications
+- Swagger-UI for accessing these APIs
