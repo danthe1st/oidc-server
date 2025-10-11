@@ -4,10 +4,12 @@ import java.util.List;
 
 import io.github.danthe1st.oidcserver.oidc.service.OIDCService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin
 public class DiscoveryController {
 	private final OIDCService oidcService;
 	
